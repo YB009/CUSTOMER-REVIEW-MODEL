@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Topic Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            background: #f8f9fa; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin-top: 40px; 
+            margin-bottom: 40px;
+        }
+        .topic-card { 
+            background: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+        .topic-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        #loading { 
+            display: none; 
+            margin: 20px 0;
+        }
+        .header {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .btn-primary {
+            background: #007bff;
+            border: none;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+            border-color: #80bdff;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .file-upload {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .file-upload:hover {
+            border-color: #007bff;
+        }
+        .topic-stats {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 class="text-center mb-3">Review Topic Analyzer</h2>
+            <p class="text-center text-muted">Upload your reviews file or enter them manually to analyze topics and sentiment</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <!-- File Upload Section -->
+                <div class="file-upload mb-4" id="dropZone">
+                    <input type="file" id="fileInput" accept=".csv,.json,.txt" style="display: none;">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                        <h5>Drag & Drop files here or click to upload</h5>
+                        <p class="text-muted">Supported formats: CSV, JSON, TXT</p>
+                    </div>
+                </div>
+
+                <!-- Manual Input Section -->
+                <div class="mb-3">
+                    <label for="reviews" class="form-label">Or paste your reviews (one per line):</label>
+                    <textarea class="form-control" id="reviews" rows="8" 
+                        placeholder="Enter your reviews here, one per line..."></textarea>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" id="analyze">Analyze Topics</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span class="ms-2">Analyzing reviews...</span>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results">
+            <!-- Chart will be inserted here -->
+            <div class="chart-container">
+                <canvas id="topicChart"></canvas>
+            </div>
+            
+            <!-- Topic Cards will be inserted here -->
+            <div id="topicCards"></div>
+            
+            <!-- Topic Statistics -->
+            <div class="topic-stats" id="topicStats"></div>
+        </div>
+    </div>
+
+    <script>
+        // File Upload Handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#007bff';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#ccc';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ccc';
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const file = files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                let reviews = [];
+
+                if (file.name.endsWith('.csv')) {
+                    reviews = parseCSV(content);
+                } else if (file.name.endsWith('.json')) {
+                    reviews = parseJSON(content);
+                } else if (file.name.endsWith('.txt')) {
+                    reviews = content.split('\n').filter(line => line.trim());
+                }
+
+                document.getElementById('reviews').value = reviews.join('\n');
+            };
+
+            if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.json')) {
+                reader.readAsText(file);
+            }
+        }
+
+        function parseCSV(content) {
+            // Simple CSV parsing - can be enhanced based on your CSV structure
+            return content.split('\n')
+                .map(line => line.split(',')[0]) // Assuming first column contains reviews
+                .filter(line => line.trim());
+        }
+
+        function parseJSON(content) {
+            try {
+                const data = JSON.parse(content);
+                // Handle different JSON structures
+                if (Array.isArray(data)) {
+                    return data.map(item => typeof item === 'string' ? item : item.text || item.review || '');
+                } else if (typeof data === 'object') {
+                    return Object.values(data).map(item => typeof item === 'string' ? item : item.text || item.review || '');
+                }
+                return [];
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+                return [];
+            }
+        }
+
+        // Analysis and Visualization
+        document.getElementById('analyze').onclick = async function() {
+            const reviewsText = document.getElementById('reviews').value;
+            const reviews = reviewsText.split('\n')
+                .map(r => r.trim())
+                .filter(r => r.length > 0);
+            
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (reviews.length === 0) {
+                resultsDiv.innerHTML = '<div class="alert alert-warning">Please enter at least one review.</div>';
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reviews })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                loadingDiv.style.display = 'none';
+
+                if (data.topics && data.topics.length > 0) {
+                    // Create pie chart
+                    const ctx = document.getElementById('topicChart').getContext('2d');
+                    const topicLabels = data.topics.map((_, idx) => `Topic ${idx + 1}`);
+                    const topicData = data.topics.map(topic => topic.length);
+
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: topicLabels,
+                            datasets: [{
+                                data: topicData,
+                                backgroundColor: [
+                                    '#FF6384',
+                                    '#36A2EB',
+                                    '#FFCE56',
+                                    '#4BC0C0',
+                                    '#9966FF'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Topic Distribution'
+                                }
+                            }
+                        }
+                    });
+
+                    // Display topic cards
+                    const topicCardsDiv = document.getElementById('topicCards');
+                    topicCardsDiv.innerHTML = '';
+                    data.topics.forEach((topic, idx) => {
+                        const card = document.createElement('div');
+                        card.className = 'card topic-card';
+                        card.innerHTML = `
+                            <div class="card-body">
+                                <h5 class="card-title">Topic ${idx + 1}</h5>
+                                <p class="card-text">${topic.join(', ')}</p>
+                            </div>
+                        `;
+                        topicCardsDiv.appendChild(card);
+                    });
+
+                    // Display topic statistics
+                    const statsDiv = document.getElementById('topicStats');
+                    statsDiv.innerHTML = `
+                        <h4>Topic Analysis Summary</h4>
+                        <p>Total Reviews Analyzed: ${reviews.length}</p>
+                        <p>Number of Topics Identified: ${data.topics.length}</p>
+                        <p>Average Words per Topic: ${(data.topics.reduce((acc, topic) => acc + topic.length, 0) / data.topics.length).toFixed(1)}</p>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<div class="alert alert-warning">No topics found.</div>';
+                }
+            } catch (err) {
+                loadingDiv.style.display = 'none';
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        Error analyzing reviews: ${err.message}
+                    </div>`;
+            }
+        };
+    </script>
+</body>
+</html>
