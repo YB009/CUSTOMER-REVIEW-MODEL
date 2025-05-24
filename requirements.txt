@@ -37,3 +37,6 @@ seaborn>=0.11.0
 # Utilities
 tqdm>=4.62.0
 requests>=2.26.0
+
+# Sentiment Analysis
+textblob>=0.17.1

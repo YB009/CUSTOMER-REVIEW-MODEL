@@ -74,6 +74,49 @@
             border-radius: 8px;
             margin-top: 20px;
         }
+        .topic-card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .topic-item {
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .topic-category {
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        
+        .coherence-scores {
+            margin-top: 8px;
+        }
+        
+        .coherence-scores .badge {
+            margin-right: 5px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item h5 {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .stat-item p {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -238,9 +281,9 @@
                 if (data.topics && data.topics.length > 0) {
                     // Create pie chart
                     const ctx = document.getElementById('topicChart').getContext('2d');
-                    const topicLabels = data.topics.map((_, idx) => `Topic ${idx + 1}`);
-                    const topicData = data.topics.map(topic => topic.length);
-
+                    const topicLabels = data.topics.map(topic => topic.title);
+                    const topicData = data.topic_stats.topic_distributions.map(x => Math.round(x * data.topic_stats.total_reviews));
+                    
                     new Chart(ctx, {
                         type: 'pie',
                         data: {
@@ -248,11 +291,7 @@
                             datasets: [{
                                 data: topicData,
                                 backgroundColor: [
-                                    '#FF6384',
-                                    '#36A2EB',
-                                    '#FFCE56',
-                                    '#4BC0C0',
-                                    '#9966FF'
+                                    '#4CAF50', '#2196F3', '#FFC107', '#F44336', '#9C27B0'
                                 ]
                             }]
                         },
@@ -260,11 +299,11 @@
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    position: 'right',
+                                    position: 'right'
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Topic Distribution'
+                                    text: 'Review Distribution by Sentiment'
                                 }
                             }
                         }
@@ -273,25 +312,59 @@
                     // Display topic cards
                     const topicCardsDiv = document.getElementById('topicCards');
                     topicCardsDiv.innerHTML = '';
-                    data.topics.forEach((topic, idx) => {
-                        const card = document.createElement('div');
-                        card.className = 'card topic-card';
-                        card.innerHTML = `
-                            <div class="card-body">
-                                <h5 class="card-title">Topic ${idx + 1}</h5>
-                                <p class="card-text">${topic.join(', ')}</p>
-                            </div>
-                        `;
-                        topicCardsDiv.appendChild(card);
+                    data.topics.forEach((sentimentGroup, idx) => {
+                        if (sentimentGroup.topics && sentimentGroup.topics.length > 0) {
+                            const card = document.createElement('div');
+                            card.className = 'card topic-card mb-4';
+                            card.innerHTML = `
+                                <div class="card-header">
+                                    <h5 class="mb-0">${sentimentGroup.title} Reviews</h5>
+                                    <span class="badge bg-primary">${sentimentGroup.count} reviews</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="topics-container">
+                                        ${sentimentGroup.topics.map(topic => `
+                                            <div class="topic-item mb-3">
+                                                <h6 class="topic-category">${topic.category}</h6>
+                                                <p class="topic-words"><strong>Top Words:</strong> ${topic.words.join(', ')}</p>
+                                                <div class="coherence-scores">
+                                                    <span class="badge bg-info">C_v: ${topic.coherence_scores.cv_score.toFixed(3)}</span>
+                                                    <span class="badge bg-info">C_p: ${topic.coherence_scores.cp_score.toFixed(3)}</span>
+                                                    <span class="badge bg-success">Combined: ${topic.coherence_scores.combined_score.toFixed(3)}</span>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                            topicCardsDiv.appendChild(card);
+                        }
                     });
 
                     // Display topic statistics
                     const statsDiv = document.getElementById('topicStats');
                     statsDiv.innerHTML = `
                         <h4>Topic Analysis Summary</h4>
-                        <p>Total Reviews Analyzed: ${reviews.length}</p>
-                        <p>Number of Topics Identified: ${data.topics.length}</p>
-                        <p>Average Words per Topic: ${(data.topics.reduce((acc, topic) => acc + topic.length, 0) / data.topics.length).toFixed(1)}</p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h5>Total Reviews</h5>
+                                    <p>${data.topic_stats.total_reviews}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h5>Topics Identified</h5>
+                                    <p>${data.topic_stats.num_topics}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h5>Avg Words per Topic</h5>
+                                    <p>${data.topic_stats.avg_words_per_topic.toFixed(1)}</p>
+                                </div>
+                            </div>
+                        </div>
                     `;
                 } else {
                     resultsDiv.innerHTML = '<div class="alert alert-warning">No topics found.</div>';
