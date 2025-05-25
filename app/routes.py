@@ -32,8 +32,7 @@ REVIEW_RANGES = [
     ("Very Good", 0.6, 1.0),
     ("Good", 0.2, 0.6),
     ("Average", -0.2, 0.2),
-    ("Bad", -0.6, -0.2),
-    ("Very Bad", -1.0, -0.6)
+    ("Bad", -1.0, -0.2)
 ]
 
 def review_sentiment_score(text):
