@@ -1,4 +1,9 @@
 from app import create_app
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
 
 app = create_app()
 
