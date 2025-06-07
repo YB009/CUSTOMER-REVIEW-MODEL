@@ -7,6 +7,9 @@ from textblob import TextBlob
 
 bp = Blueprint('api', __name__)
 
+# Global variable to store analyzed reviews by sentiment
+_analyzed_reviews_by_sentiment = {}
+
 # Define your categories and associated keywords
 TOPIC_CATEGORIES = {
     "Electronics": {"electronics", "device", "gadget", "battery", "screen", "charger", "phone", "laptop", "camera", "instruction", "usb", "speaker", "headphone", "tv", "monitor", "tablet", "remote", "wireless", "bluetooth"},
@@ -117,6 +120,10 @@ def analyze():
             range_reviews[label].append(r)
             review_scores.append((r, score, label))
 
+        # Store range_reviews globally for access by other endpoints
+        global _analyzed_reviews_by_sentiment
+        _analyzed_reviews_by_sentiment = range_reviews
+
         # Analyze topics for each sentiment range
         topic_details = []
         for label, _, _ in REVIEW_RANGES:
@@ -159,6 +166,43 @@ def analyze():
         })
     except Exception as e:
         print(f"Error in analyze endpoint: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/get_examples', methods=['POST'])
+def get_examples():
+    try:
+        data = request.json
+        if not data or 'category' not in data or 'sentiment' not in data or 'words' not in data:
+            return jsonify({'error': 'Invalid request data'}), 400
+
+        category = data['category']
+        sentiment = data['sentiment']
+        topic_words = data['words']
+
+        # Get reviews for the requested sentiment range
+        relevant_reviews = _analyzed_reviews_by_sentiment.get(sentiment, [])
+
+        # Find example reviews that contain at least one of the topic words
+        example_reviews = []
+        # Limit the number of examples to return
+        max_examples = 5
+
+        for review_text in relevant_reviews:
+            # Simple check: does the review contain any of the top words?
+            if any(word.lower() in review_text.lower() for word in topic_words):
+                example_reviews.append({
+                    'text': review_text,
+                    'sentiment': sentiment,
+                    'date': 'N/A' # You might want to add date handling if available
+                })
+                if len(example_reviews) >= max_examples:
+                    break
+
+        return jsonify({'examples': example_reviews})
+
+    except Exception as e:
+        print(f"Error in get_examples endpoint: {str(e)}")
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 

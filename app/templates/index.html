@@ -5,20 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Topic Analyzer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         body { 
             background: #f8f9fa; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .container { 
-            max-width: 1000px; 
-            margin-top: 40px; 
-            margin-bottom: 40px;
+        .container-fluid { 
+            padding: 20px;
+        }
+        .sidebar {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            height: calc(100vh - 40px);
+            position: sticky;
+            top: 20px;
+            overflow-y: auto;
+        }
+        .main-content {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-left: 20px;
         }
         .topic-card { 
             background: #fff; 
-            border-radius: 8px; 
+            border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             margin-bottom: 15px;
             transition: transform 0.2s;
@@ -27,170 +44,243 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        #loading { 
-            display: none; 
-            margin: 20px 0;
-        }
-        .header {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-        .btn-primary {
-            background: #007bff;
-            border: none;
-            padding: 10px 25px;
-            font-weight: 500;
-        }
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-        .form-control:focus {
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-            border-color: #80bdff;
-        }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-            margin: 20px 0;
-        }
-        .file-upload {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
+        
+        .word-cloud {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
             cursor: pointer;
         }
-        .file-upload:hover {
-            border-color: #007bff;
+        .word-cloud:hover {
+            color: #0056b3;
         }
-        .topic-stats {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+        .filter-section {
+            margin-bottom: 20px;
         }
-        .topic-card {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .filter-section h6 {
+            color: #6c757d;
+            margin-bottom: 10px;
         }
-        
-        .topic-item {
+        .coherence-indicator {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+        .coherence-bar {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+        }
+        .topic-examples {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .topic-examples.show {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        .category-header {
+            cursor: pointer;
             padding: 10px;
-            border-left: 3px solid #007bff;
-            background-color: #f8f9fa;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .category-header:hover {
+            background: #e9ecef;
+        }
+        .category-content {
+            display: none;
+        }
+        .category-content.show {
+            display: block;
+        }
+        .tooltip-inner {
+            max-width: 300px;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
             border-radius: 4px;
         }
-        
-        .topic-category {
-            color: #007bff;
+        .legend-item {
+            display: flex;
+            align-items: center;
             margin-bottom: 5px;
         }
-        
-        .coherence-scores {
-            margin-top: 8px;
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        .example-review {
+            transition: background-color 0.2s;
         }
         
-        .coherence-scores .badge {
-            margin-right: 5px;
+        .example-review:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .topic-card .badge {
+            font-size: 0.85em;
+            padding: 0.5em 0.75em;
+        }
+        
+        .topic-words {
+            color: #6c757d;
+            font-size: 0.95em;
+        }
+        
+        .topic-cloud text {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .topic-cloud text:hover {
+            filter: brightness(1.2);
         }
         
         .stat-item {
-            text-align: center;
-            padding: 15px;
-            background-color: #f8f9fa;
+            background: #fff;
             border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .stat-item h5 {
             color: #6c757d;
-            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
         }
         
         .stat-item p {
-            font-size: 1.5rem;
-            font-weight: bold;
             color: #007bff;
+            font-size: 1.8rem;
+            font-weight: 600;
             margin: 0;
+        }
+        
+        .file-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            background: #f8f9fa;
+        }
+        
+        .file-upload:hover {
+            border-color: #007bff;
+            background: #fff;
+        }
+        
+        .file-upload i {
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload:hover i {
+            color: #007bff;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2 class="text-center mb-3">Review Topic Analyzer</h2>
-            <p class="text-center text-muted">Upload your reviews file or enter them manually to analyze topics and sentiment</p>
-        </div>
+    <div class="container-fluid">
+        <div class="row">
+            
 
-        <div class="card">
-            <div class="card-body">
-                <!-- File Upload Section -->
-                <div class="file-upload mb-4" id="dropZone">
-                    <input type="file" id="fileInput" accept=".csv,.json,.txt" style="display: none;">
-                    <div class="upload-content">
+            <!-- Main Content -->
+            <div class="col-md-12">
+                <div class="main-content">
+                    <div class="header mb-4">
+                        <h2 class="text-center mb-3">Review Topic Analyzer</h2>
+                        <p class="text-center text-muted">Upload your reviews file or enter them manually to analyze topics and sentiment</p>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="file-upload mb-4" id="dropZone">
+                        <input type="file" id="fileInput" style="display: none;" accept=".txt,.json">
                         <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-                        <h5>Drag & Drop files here or click to upload</h5>
-                        <p class="text-muted">Supported formats: CSV, JSON, TXT</p>
+                        <h5>Drag & Drop your file here</h5>
+                        <p class="text-muted">or click to browse</p>
+                        <small class="text-muted">Supported formats: .txt, .json</small>
                     </div>
-                </div>
 
-                <!-- Format Reference Section -->
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Expected Format Reference</h5>
+                    <!-- Manual Input Section -->
+                    <div class="mb-4">
+                        <label for="reviews" class="form-label">Or paste your reviews (one per line):</label>
+                        <textarea class="form-control" id="reviews" rows="8" 
+                            placeholder="Enter your reviews here, one per line..."></textarea>
                     </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-3">For best analysis, format your reviews as follows:</p>
-                        <div class="bg-light p-3 rounded">
-                            <pre class="mb-0" style="white-space: pre-wrap;">"Absolutely love this product! Works better than I expected.",5,electronics
-"The item arrived damaged and the quality is poor.",1,home goods
-"Decent product for the price, but could be improved.",3,clothing</pre>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="analyze">Analyze Topics</button>
+                    </div>
+
+                    <div id="loading" class="text-center my-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <span class="ms-2">Analyzing reviews...</span>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="results">
+                        <!-- Summary Dashboard -->
+                        <div class="row mb-4" id="summaryDashboard">
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h5>Total Reviews</h5>
+                                    <p id="totalReviews">0</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h5>Topics Identified</h5>
+                                    <p id="totalTopics">0</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h5>Avg Coherence</h5>
+                                    <p id="avgCoherence">0.00</p>
+                                </div>
+                            </div>
                         </div>
-                        <p class="mt-3 text-muted small">Format: "review text",rating,category</p>
-                        <ul class="small text-muted">
-                            <li>Rating: 1-5 (1 being lowest, 5 being highest)</li>
-                            <li>Category: Any relevant category (e.g., electronics, clothing, home goods)</li>
-                        </ul>
+
+                        <!-- Topic Distribution Chart -->
+                        <div class="chart-container mb-4">
+                            <canvas id="topicChart"></canvas>
+                        </div>
+                        
+                        <!-- Topic Cards Container -->
+                        <div id="topicCards"></div>
                     </div>
                 </div>
-
-                <!-- Manual Input Section -->
-                <div class="mb-3">
-                    <label for="reviews" class="form-label">Or paste your reviews (one per line):</label>
-                    <textarea class="form-control" id="reviews" rows="8" 
-                        placeholder="Enter your reviews here, one per line..."></textarea>
-                </div>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" id="analyze">Analyze Topics</button>
-                </div>
             </div>
-        </div>
-
-        <div id="loading" class="text-center">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span class="ms-2">Analyzing reviews...</span>
-        </div>
-
-        <!-- Results Section -->
-        <div id="results">
-            <!-- Chart will be inserted here -->
-            <div class="chart-container">
-                <canvas id="topicChart"></canvas>
-            </div>
-            
-            <!-- Topic Cards will be inserted here -->
-            <div id="topicCards"></div>
-            
-            <!-- Topic Statistics -->
-            <div class="topic-stats" id="topicStats"></div>
         </div>
     </div>
 
     <script>
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
         // File Upload Handling
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
@@ -210,61 +300,41 @@
             e.preventDefault();
             dropZone.style.borderColor = '#ccc';
             const files = e.dataTransfer.files;
-            handleFiles(files);
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
         });
 
         fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
         });
 
-        function handleFiles(files) {
-            const file = files[0];
-            if (!file) return;
-
+        function handleFile(file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = (e) => {
                 const content = e.target.result;
-                let reviews = [];
-
-                if (file.name.endsWith('.csv')) {
-                    reviews = parseCSV(content);
-                } else if (file.name.endsWith('.json')) {
-                    reviews = parseJSON(content);
-                } else if (file.name.endsWith('.txt')) {
-                    reviews = content.split('\n').filter(line => line.trim());
-                }
-
+                const reviews = parseFileContent(content, file.name);
                 document.getElementById('reviews').value = reviews.join('\n');
             };
-
-            if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
-                reader.readAsText(file);
-            } else if (file.name.endsWith('.json')) {
-                reader.readAsText(file);
-            }
+            reader.readAsText(file);
         }
 
-        function parseCSV(content) {
-            // Simple CSV parsing - can be enhanced based on your CSV structure
-            return content.split('\n')
-                .map(line => line.split(',')[0]) // Assuming first column contains reviews
-                .filter(line => line.trim());
-        }
-
-        function parseJSON(content) {
-            try {
-                const data = JSON.parse(content);
-                // Handle different JSON structures
-                if (Array.isArray(data)) {
-                    return data.map(item => typeof item === 'string' ? item : item.text || item.review || '');
-                } else if (typeof data === 'object') {
-                    return Object.values(data).map(item => typeof item === 'string' ? item : item.text || item.review || '');
+        function parseFileContent(content, filename) {
+            if (filename.endsWith('.json')) {
+                try {
+                    const data = JSON.parse(content);
+                    if (Array.isArray(data)) {
+                        return data.map(item => typeof item === 'string' ? item : item.text || item.review || '');
+                    } else if (typeof data === 'object') {
+                        return Object.values(data).map(item => typeof item === 'string' ? item : item.text || item.review || '');
+                    }
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
                 }
-                return [];
-            } catch (e) {
-                console.error('Error parsing JSON:', e);
-                return [];
             }
+            return content.split('\n').filter(line => line.trim());
         }
 
         // Analysis and Visualization
@@ -299,7 +369,16 @@
                 loadingDiv.style.display = 'none';
 
                 if (data.topics && data.topics.length > 0) {
-                    // Create pie chart
+                    // Update summary dashboard
+                    document.getElementById('totalReviews').textContent = data.topic_stats.total_reviews;
+                    document.getElementById('totalTopics').textContent = data.topic_stats.num_topics;
+                    document.getElementById('avgCoherence').textContent = 
+                        (data.topics.reduce((acc, group) => 
+                            acc + group.topics.reduce((sum, topic) => 
+                                sum + topic.coherence_scores.combined_score, 0), 0) / 
+                        data.topics.reduce((acc, group) => acc + group.topics.length, 0)).toFixed(2);
+
+                    // Create topic distribution chart
                     const ctx = document.getElementById('topicChart').getContext('2d');
                     const topicLabels = data.topics.map(topic => topic.title);
                     const topicData = data.topic_stats.topic_distributions.map(x => Math.round(x * data.topic_stats.total_reviews));
@@ -332,60 +411,40 @@
                     // Display topic cards
                     const topicCardsDiv = document.getElementById('topicCards');
                     topicCardsDiv.innerHTML = '';
-                    data.topics.forEach((sentimentGroup, idx) => {
-                        if (sentimentGroup.topics && sentimentGroup.topics.length > 0) {
-                            const card = document.createElement('div');
-                            card.className = 'card topic-card mb-4';
-                            card.innerHTML = `
-                                <div class="card-header">
-                                    <h5 class="mb-0">${sentimentGroup.title} Reviews</h5>
-                                    <span class="badge bg-primary">${sentimentGroup.count} reviews</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="topics-container">
-                                        ${sentimentGroup.topics.map(topic => `
-                                            <div class="topic-item mb-3">
-                                                <h6 class="topic-category">${topic.category}</h6>
-                                                <p class="topic-words"><strong>Top Words:</strong> ${topic.words.join(', ')}</p>
-                                                <div class="coherence-scores">
-                                                    <span class="badge bg-info">C_v: ${topic.coherence_scores.cv_score.toFixed(3)}</span>
-                                                    <span class="badge bg-info">C_p: ${topic.coherence_scores.cp_score.toFixed(3)}</span>
-                                                    <span class="badge bg-success">Combined: ${topic.coherence_scores.combined_score.toFixed(3)}</span>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                            topicCardsDiv.appendChild(card);
-                        }
+                    
+                    // Group topics by category
+                    const categoryGroups = {};
+                    data.topics.forEach(sentimentGroup => {
+                        sentimentGroup.topics.forEach(topic => {
+                            if (!categoryGroups[topic.category]) {
+                                categoryGroups[topic.category] = [];
+                            }
+                            categoryGroups[topic.category].push({
+                                ...topic,
+                                sentiment: sentimentGroup.title
+                            });
+                        });
                     });
 
-                    // Display topic statistics
-                    const statsDiv = document.getElementById('topicStats');
-                    statsDiv.innerHTML = `
-                        <h4>Topic Analysis Summary</h4>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="stat-item">
-                                    <h5>Total Reviews</h5>
-                                    <p>${data.topic_stats.total_reviews}</p>
-                                </div>
+                    // Create category sections
+                    Object.entries(categoryGroups).forEach(([category, topics]) => {
+                        const categorySection = document.createElement('div');
+                        categorySection.className = 'category-section mb-4';
+                        categorySection.innerHTML = `
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <h5 class="mb-0">
+                                    ${category} (${topics.length} topics)
+                                    <i class="fas fa-chevron-down float-end"></i>
+                                </h5>
                             </div>
-                            <div class="col-md-4">
-                                <div class="stat-item">
-                                    <h5>Topics Identified</h5>
-                                    <p>${data.topic_stats.num_topics}</p>
-                                </div>
+                            <div class="category-content">
+                                ${topics.map(topic => createTopicCard(topic)).join('')}
                             </div>
-                            <div class="col-md-4">
-                                <div class="stat-item">
-                                    <h5>Avg Words per Topic</h5>
-                                    <p>${data.topic_stats.avg_words_per_topic.toFixed(1)}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                        `;
+                        topicCardsDiv.appendChild(categorySection);
+                    });
+
+
                 } else {
                     resultsDiv.innerHTML = '<div class="alert alert-warning">No topics found.</div>';
                 }
@@ -397,6 +456,130 @@
                     </div>`;
             }
         };
+
+        function createTopicCard(topic) {
+            const coherenceScore = topic.coherence_scores.combined_score;
+            const coherenceColor = coherenceScore > 0.6 ? '#28a745' : 
+                                 coherenceScore > 0.3 ? '#ffc107' : '#dc3545';
+            
+            return `
+                <div class="topic-card" 
+                     data-coherence="${coherenceScore}"
+                     data-sentiment="${topic.sentiment}"
+                     data-category="${topic.category}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">
+                                ${topic.category}
+                                <span class="badge bg-secondary ms-2">${topic.sentiment}</span>
+                            </h5>
+                            <span class="badge" style="background: ${coherenceColor}">
+                                Coherence: ${coherenceScore.toFixed(3)}
+                            </span>
+                        </div>
+                        <div class="topic-words mb-3">
+                            <strong>Top Words:</strong> ${topic.words.join(', ')}
+                        </div>
+                        
+                        <div class="coherence-indicator">
+                            <div class="coherence-bar" style="width: ${coherenceScore * 100}%"></div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary" onclick="toggleExamples(this)">
+                                Show Example Reviews
+                            </button>
+                        </div>
+                        <div class="topic-examples mt-3">
+                            <div class="text-center py-2">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCategory(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            content.classList.toggle('show');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+
+        async function loadExampleReviews(topic, examplesDiv) {
+            try {
+                const response = await fetch('/get_examples', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: topic.category,
+                        sentiment: topic.sentiment,
+                        words: topic.words
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load examples');
+                }
+
+                const data = await response.json();
+                examplesDiv.innerHTML = data.examples.map(example => `
+                    <div class="example-review p-2 border-bottom">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <p class="mb-1">${example.text}</p>
+                            <span class="badge bg-${getSentimentColor(example.sentiment)} ms-2">
+                                ${example.sentiment}
+                            </span>
+                        </div>
+                        <small class="text-muted">${example.date}</small>
+                    </div>
+                `).join('') || '<p class="text-muted">No example reviews found</p>';
+            } catch (error) {
+                console.error('Error loading examples:', error);
+                examplesDiv.innerHTML = `
+                    <div class="alert alert-warning m-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Failed to load example reviews
+                    </div>
+                `;
+            }
+        }
+
+        function getSentimentColor(sentiment) {
+            switch (sentiment.toLowerCase()) {
+                case 'very good': return 'success';
+                case 'good': return 'info';
+                case 'average': return 'warning';
+                case 'bad': return 'danger';
+                default: return 'secondary';
+            }
+        }
+
+        function toggleExamples(button) {
+            const examplesDiv = button.nextElementSibling;
+            const topicCard = button.closest('.topic-card');
+            const topic = {
+                category: topicCard.dataset.category,
+                sentiment: topicCard.dataset.sentiment,
+                words: topicCard.querySelector('.topic-words').textContent
+                    .replace('Top Words:', '')
+                    .split(',')
+                    .map(w => w.trim())
+            };
+
+            examplesDiv.classList.toggle('show');
+            button.textContent = examplesDiv.classList.contains('show') ? 
+                'Hide Example Reviews' : 'Show Example Reviews';
+
+            if (examplesDiv.classList.contains('show')) {
+                loadExampleReviews(topic, examplesDiv);
+            }
+        }
+
+        
     </script>
 </body>
 </html>
