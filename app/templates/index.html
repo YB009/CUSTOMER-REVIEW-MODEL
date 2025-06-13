@@ -215,11 +215,11 @@
 
                     <!-- File Upload Section -->
                     <div class="file-upload mb-4" id="dropZone">
-                        <input type="file" id="fileInput" style="display: none;" accept=".txt,.json">
+                        <input type="file" id="fileInput" style="display: none;" accept=".txt,.json,.csv">
                         <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
                         <h5>Drag & Drop your file here</h5>
                         <p class="text-muted">or click to browse</p>
-                        <small class="text-muted">Supported formats: .txt, .json</small>
+                        <small class="text-muted">Supported formats: .txt, .json, .csv</small>
                     </div>
 
                     <!-- Manual Input Section -->
@@ -332,6 +332,29 @@
                     }
                 } catch (e) {
                     console.error('Error parsing JSON:', e);
+                }
+            } else if (filename.endsWith('.csv')) {
+                try {
+                    const lines = content.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                    
+                    // Find the review column
+                    const reviewColumnIndex = headers.findIndex(h => 
+                        ['review', 'text', 'comment', 'feedback', 'description'].some(keyword => h.includes(keyword))
+                    );
+                    
+                    // If no review column found, use the first column
+                    const columnIndex = reviewColumnIndex >= 0 ? reviewColumnIndex : 0;
+                    
+                    // Parse CSV rows
+                    return lines.slice(1)
+                        .map(line => {
+                            const values = line.split(',').map(v => v.trim());
+                            return values[columnIndex] || '';
+                        })
+                        .filter(text => text.length > 0);
+                } catch (e) {
+                    console.error('Error parsing CSV:', e);
                 }
             }
             return content.split('\n').filter(line => line.trim());

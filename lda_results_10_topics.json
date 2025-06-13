@@ -1,0 +1,189 @@
+{
+  "num_topics": 10,
+  "topics": [
+    [
+      "battery",
+      "feel",
+      "item",
+      "better",
+      "performance",
+      "sim",
+      "beautiful",
+      "life",
+      "expected",
+      "day"
+    ],
+    [
+      "excellent",
+      "phone",
+      "expensive",
+      "great",
+      "price",
+      "good",
+      "work",
+      "deal",
+      "worth",
+      "super"
+    ],
+    [
+      "phone",
+      "experience",
+      "iphone",
+      "gb",
+      "awesome",
+      "apple",
+      "best",
+      "smooth",
+      "bad",
+      "android"
+    ],
+    [
+      "good",
+      "genuine",
+      "original",
+      "working",
+      "old",
+      "great",
+      "product",
+      "iphone",
+      "received",
+      "review"
+    ],
+    [
+      "unlocked",
+      "go",
+      "upgrade",
+      "product",
+      "iphone",
+      "good",
+      "condition",
+      "even",
+      "one",
+      "excellent"
+    ],
+    [
+      "like",
+      "phone",
+      "loved",
+      "love",
+      "new",
+      "box",
+      "iphone",
+      "almost",
+      "brand",
+      "look"
+    ],
+    [
+      "buy",
+      "nt",
+      "great",
+      "purchase",
+      "performance",
+      "iphone",
+      "amazon",
+      "awesome",
+      "camera",
+      "quality"
+    ],
+    [
+      "perfect",
+      "delivery",
+      "poor",
+      "amazon",
+      "service",
+      "time",
+      "battery",
+      "phone",
+      "stolen",
+      "amazing"
+    ],
+    [
+      "screen",
+      "good",
+      "satisfied",
+      "got",
+      "product",
+      "defective",
+      "value",
+      "mobile",
+      "money",
+      "scratch"
+    ],
+    [
+      "issue",
+      "nice",
+      "heating",
+      "excelente",
+      "happy",
+      "really",
+      "problem",
+      "phone",
+      "superb",
+      "bien"
+    ]
+  ],
+  "coherence_scores": [
+    {
+      "cv_score": 0.363274104425252,
+      "cp_score": 1.1842544723723545,
+      "combined_score": 0.691666251604093
+    },
+    {
+      "cv_score": 0.4409815847583915,
+      "cp_score": 0.9072431436941824,
+      "combined_score": 0.6274862083327079
+    },
+    {
+      "cv_score": 0.5696347613863167,
+      "cp_score": 1.2641356552036205,
+      "combined_score": 0.8474351189132383
+    },
+    {
+      "cv_score": 0.3778143888443185,
+      "cp_score": 0.6271029242165482,
+      "combined_score": 0.47752980299321035
+    },
+    {
+      "cv_score": 0.3463724163544941,
+      "cp_score": 0.7125336973450228,
+      "combined_score": 0.4928369287507056
+    },
+    {
+      "cv_score": 0.5449512002709291,
+      "cp_score": 1.2554145149185973,
+      "combined_score": 0.8291365261299964
+    },
+    {
+      "cv_score": 0.496290893822598,
+      "cp_score": 1.0447123186829859,
+      "combined_score": 0.7156594637667532
+    },
+    {
+      "cv_score": 0.4185506883823356,
+      "cp_score": 1.0389798692971721,
+      "combined_score": 0.6667223607482702
+    },
+    {
+      "cv_score": 0.3240724747511289,
+      "cp_score": 0.73560444119464,
+      "combined_score": 0.4886852613285333
+    },
+    {
+      "cv_score": 0.2711014866559025,
+      "cp_score": 0.669244091755625,
+      "combined_score": 0.43035852869579155
+    }
+  ],
+  "topic_distributions": [
+    0.09219571370804691,
+    0.10149615851192884,
+    0.11423372422159321,
+    0.09603720177921553,
+    0.10311362717347351,
+    0.09947432268499798,
+    0.10432672866963202,
+    0.09664375252729479,
+    0.10028305701577032,
+    0.09219571370804691
+  ]
+}

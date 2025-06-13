@@ -1,0 +1,99 @@
+{
+  "num_topics": 5,
+  "topics": [
+    [
+      "camera",
+      "good",
+      "phone",
+      "delivery",
+      "great",
+      "quality",
+      "capacity",
+      "product",
+      "battery",
+      "perfect"
+    ],
+    [
+      "awesome",
+      "camera",
+      "better",
+      "great",
+      "best",
+      "quality",
+      "beautiful",
+      "iphone",
+      "amazing",
+      "phone"
+    ],
+    [
+      "iphone",
+      "money",
+      "upgrade",
+      "apple",
+      "value",
+      "one",
+      "best",
+      "new",
+      "good",
+      "mobile"
+    ],
+    [
+      "amazon",
+      "battery",
+      "worth",
+      "phone",
+      "issue",
+      "buy",
+      "worst",
+      "iphone",
+      "heating",
+      "best"
+    ],
+    [
+      "really",
+      "purchase",
+      "received",
+      "user",
+      "excellent",
+      "nice",
+      "product",
+      "condition",
+      "phone",
+      "good"
+    ]
+  ],
+  "coherence_scores": [
+    {
+      "cv_score": 0.4207862510750603,
+      "cp_score": 0.7743849930310955,
+      "combined_score": 0.5622257478574744
+    },
+    {
+      "cv_score": 0.5933857704317151,
+      "cp_score": 1.0101797951350637,
+      "combined_score": 0.7601033803130546
+    },
+    {
+      "cv_score": 0.37994868275481347,
+      "cp_score": 0.9024168573735197,
+      "combined_score": 0.5889359526022959
+    },
+    {
+      "cv_score": 0.3986952415312197,
+      "cp_score": 0.8153755400986742,
+      "combined_score": 0.5653673609582015
+    },
+    {
+      "cv_score": 0.36499215918181144,
+      "cp_score": 0.6776267930600736,
+      "combined_score": 0.4900460127331163
+    }
+  ],
+  "topic_distributions": [
+    0.21117502054231718,
+    0.25677896466721445,
+    0.19063270336894,
+    0.1466721446179129,
+    0.19474116680361545
+  ]
+}
