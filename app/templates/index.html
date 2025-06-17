@@ -198,6 +198,19 @@
         .file-upload:hover i {
             color: #007bff;
         }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            max-width: 400px;
+            margin: 20px auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas#topicChart {
+            max-width: 100%;
+            max-height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -361,6 +374,7 @@
         }
 
         // Analysis and Visualization
+        let analysisRun = false;
         document.getElementById('analyze').onclick = async function() {
             const reviewsText = document.getElementById('reviews').value;
             const reviews = reviewsText.split('\n')
@@ -390,6 +404,7 @@
 
                 const data = await response.json();
                 loadingDiv.style.display = 'none';
+                analysisRun = true;
 
                 if (data.topics && data.topics.length > 0) {
                     // Update summary dashboard
@@ -467,7 +482,12 @@
                         topicCardsDiv.appendChild(categorySection);
                     });
 
-
+                    // Enable all example review buttons
+                    setTimeout(() => {
+                        document.querySelectorAll('.btn-outline-primary').forEach(btn => {
+                            btn.disabled = false;
+                        });
+                    }, 100);
                 } else {
                     resultsDiv.innerHTML = '<div class="alert alert-warning">No topics found.</div>';
                 }
@@ -490,35 +510,20 @@
                      data-coherence="${coherenceScore}"
                      data-sentiment="${topic.sentiment}"
                      data-category="${topic.category}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-0">
-                                ${topic.category}
-                                <span class="badge bg-secondary ms-2">${topic.sentiment}</span>
-                            </h5>
-                            <span class="badge" style="background: ${coherenceColor}">
-                                Coherence: ${coherenceScore.toFixed(3)}
-                            </span>
-                        </div>
-                        <div class="topic-words mb-3">
-                            <strong>Top Words:</strong> ${topic.words.join(', ')}
-                        </div>
-                        
-                        <div class="coherence-indicator">
-                            <div class="coherence-bar" style="width: ${coherenceScore * 100}%"></div>
-                        </div>
-                        <div class="mt-3">
-                            <button class="btn btn-sm btn-outline-primary" onclick="toggleExamples(this)">
-                                Show Example Reviews
-                            </button>
-                        </div>
-                        <div class="topic-examples mt-3">
-                            <div class="text-center py-2">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">
+                            ${topic.category}
+                            <span class="badge bg-secondary ms-2">${topic.sentiment}</span>
+                        </h5>
+                        <span class="badge" style="background: ${coherenceColor}">
+                            Coherence: ${coherenceScore.toFixed(3)}
+                        </span>
+                    </div>
+                    <div class="topic-words mb-3">
+                        <strong>Top Words:</strong> ${topic.words.join(', ')}
+                    </div>
+                    <div class="coherence-indicator">
+                        <div class="coherence-bar" style="width: ${coherenceScore * 100}%"></div>
                     </div>
                 </div>
             `;
@@ -549,23 +554,27 @@
                 }
 
                 const data = await response.json();
-                examplesDiv.innerHTML = data.examples.map(example => `
-                    <div class="example-review p-2 border-bottom">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <p class="mb-1">${example.text}</p>
-                            <span class="badge bg-${getSentimentColor(example.sentiment)} ms-2">
-                                ${example.sentiment}
-                            </span>
+                if (data.examples && data.examples.length > 0) {
+                    examplesDiv.innerHTML = data.examples.map(example => `
+                        <div class="example-review p-2 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <p class="mb-1">${example.text}</p>
+                                <span class="badge bg-${getSentimentColor(example.sentiment)} ms-2">
+                                    ${example.sentiment}
+                                </span>
+                            </div>
+                            <small class="text-muted">${example.date}</small>
                         </div>
-                        <small class="text-muted">${example.date}</small>
-                    </div>
-                `).join('') || '<p class="text-muted">No example reviews found</p>';
+                    `).join('');
+                } else {
+                    examplesDiv.innerHTML = '<p class="text-muted">No example reviews found. Try running analysis again or with more reviews.</p>';
+                }
             } catch (error) {
                 console.error('Error loading examples:', error);
                 examplesDiv.innerHTML = `
                     <div class="alert alert-warning m-2">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        Failed to load example reviews
+                        Failed to load example reviews. Please make sure you have run the analysis.
                     </div>
                 `;
             }
@@ -582,6 +591,10 @@
         }
 
         function toggleExamples(button) {
+            if (!analysisRun) {
+                alert('Please run the analysis first by clicking Analyze Topics.');
+                return;
+            }
             const examplesDiv = button.nextElementSibling;
             const topicCard = button.closest('.topic-card');
             const topic = {
