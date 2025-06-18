@@ -13,7 +13,7 @@ _analyzed_reviews_by_sentiment = {}
 # Define your categories and associated keywords
 TOPIC_CATEGORIES = {
     "Electronics": {"electronics", "device", "gadget", "battery", "screen", "charger", "phone", "laptop", "camera", "instruction", "usb", "speaker", "headphone", "tv", "monitor", "tablet", "remote", "wireless", "bluetooth"},
-    "Clothing": {"clothing", "shirt", "pants", "dress", "jeans", "jacket", "wear", "fashion", "size", "fit", "color", "flaw", "sweater", "t-shirt", "skirt", "shorts", "sock", "shoe", "sneaker", "boot", "style", "material"},
+    "Appearance": {"clothing", "shirt", "pants", "dress", "jeans", "jacket", "wear", "fashion", "size", "fit", "color", "flaw", "sweater", "t-shirt", "skirt", "shorts", "sock", "shoe", "sneaker", "boot", "style", "material"},
     "Home Goods": {"home", "furniture", "sofa", "table", "chair", "kitchen", "bed", "appliance", "goods", "quality", "lamp", "couch", "mattress", "blanket", "pillow", "sheet", "towel", "cookware", "utensil", "microwave", "oven", "fridge", "vacuum"},
     "Shipping": {"shipping", "delivery", "arrived", "late", "fast", "slow", "package", "order", "tracking", "courier", "dispatch", "ship", "receive", "delay", "box", "parcel"},
     "Customer Service": {"service", "support", "help", "customer", "staff", "response", "return", "refund", "exchange", "agent", "representative", "call", "email", "contact", "complaint", "resolve", "assistance"},
