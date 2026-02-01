@@ -14,7 +14,7 @@ Text Processing: NLTK
 Data Handling: Pandas
 
 
-### STREAMLIT USAGE
+## STREAMLIT USAGE
 This project is a **Streamlit-based web application** for analyzing customer review sentiment using **TextBlob**.  
 Users can either paste reviews directly or upload a CSV file and analyze reviews in bulk.
 
