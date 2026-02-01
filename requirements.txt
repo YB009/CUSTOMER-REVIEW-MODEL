@@ -41,3 +41,6 @@ requests>=2.26.0
 
 # Sentiment Analysis
 textblob>=0.17.1
+
+#Streamlit
+streamlit>=1.30.0
